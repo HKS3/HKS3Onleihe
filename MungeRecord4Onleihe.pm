@@ -1,4 +1,4 @@
-package Koha::Plugin::At::TrustBox::MungeRecord4Onleihe;
+package Koha::Plugin::HKS3Onleihe::MungeRecord4Onleihe;
 
 use Modern::Perl;
 use Template;
@@ -55,19 +55,19 @@ sub api_namespace {
 
 sub munge_record {
     my ( $self, $record, $params ) = @_;
-    return $record unless $record->field("003")->data() eq 'DE-Wi27';    
+    return $record unless $record->field("003")->data() eq 'DE-Wi27';
     my $patron = $params->{patron};
     my $urldata = C4::Context->preference('OPACBaseURL') . '/cgi-bin/koha/opac-user.pl';
     # use Data::Dumper::Concise; print Dumper $patron;
     if ($patron) {
         # say $patron->cardnumber;
         # say $patron->dateofbirth;
-        # say $patron->email;        
+        # say $patron->email;
         $urldata = _query_onleihe($patron, $record);
     } else {
         [$record->field("856")]->[2]->update('z' => 'Bitte einloggen zum entlehnen');
-    }     
-        
+    }
+
     # say $record->field("001")->data();
     [$record->field("856")]->[2]->update('u' => $urldata);
 
@@ -90,22 +90,22 @@ sub _query_onleihe {
     my $tt = Template->new({
         INTERPOLATE  => 0,
     });
-    
+
     my $vars = {
         UserID              => '3',                     # $patron->id ?
         CardId              => 'LB0000015',             # $patron->cardnumber
-        DateOfBirth         => '05.02.1949',            # $patron->dateofbirth  
-        ItemIdentifier      => $record->field("001")->data(),  
+        DateOfBirth         => '05.02.1949',            # $patron->dateofbirth
+        ItemIdentifier      => $record->field("001")->data(),
         Language            => 'de',
         AgencyId            => '392',
         EmailAddress        => $patron->email,
     };
-    
+
     my $xml;
     my $request_xml = get_xml('requestitem');
     $tt->process(\$request_xml, $vars, \$xml)
         || die $tt->error(), "\n";
-    
+
     my $checkout_url;
     my $ua = LWP::UserAgent->new;
     my $host = "https://ncip.onleihe.de/ncip/service/";
@@ -117,7 +117,7 @@ sub _query_onleihe {
     else {
         $checkout_url = 'onleihe not available at the moment';
     }
-    return $checkout_url; 
+    return $checkout_url;
 }
 
 sub get_xml {
@@ -160,4 +160,3 @@ XML
     my $template = shift;
     return $xml_templates->{$template};
 }
-
