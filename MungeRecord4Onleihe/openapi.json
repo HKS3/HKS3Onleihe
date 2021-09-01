@@ -1,13 +1,13 @@
 {
-  "/gnd": {
+  "/status": {
     "get": {
-      "x-mojo-to": "At::TrustBox::Link2Wikipedia::Link2WikipediaController#get",
-      "operationId": "Link2Wikipedia",
-      "tags": ["authority"],
+      "x-mojo-to": "HKS3Onleihe::MungeRecord4Onleihe::MungeRecord4OnleiheController#status",
+      "operationId": "SyncOnleihe",
+      "tags": ["onleihe"],
       "parameters": [{
         "name": "id",
         "in": "query",
-        "description": "gnd id",
+        "description": "user id",
         "required": true,
         "type": "string"
       }
@@ -17,12 +17,63 @@
       ],
       "responses": {
         "200": {
-          "description": "get extract from wikipedia",
+          "description": "sync koha with onliehe",
           "schema": {
               "type": "object",
                 "properties": {
                   "link": {
-                    "description": "redirect to wikipedia",
+                    "description": "onleihe",
+                    "type": "boolean"
+                  }
+                }
+          }
+        },
+        "404": {
+          "description": "An error occured",
+          "schema": {
+              "type": "object",
+                "properties": {
+                  "error": {
+                    "description": "No entry found",
+                    "type": "string"
+                  }
+                }
+          }
+        }
+      }
+    }
+  },
+  "/synccheckouts": {
+    "put": {
+      "x-mojo-to": "HKS3Onleihe::MungeRecord4Onleihe::MungeRecord4OnleiheController#synccheckouts",
+      "operationId": "SyncOnleiheWrite",
+      "tags": ["onleihe"],
+      "parameters": [{
+        "name": "patron_id",
+        "in": "query",
+        "description": "user id",
+        "required": true,
+        "type": "string"
+      },
+      {
+        "name": "agency_id",
+        "in": "query",
+        "description": "agency id",
+        "required": true,
+        "type": "string"
+      }
+      ],
+      "produces": [
+        "application/json"
+      ],
+      "responses": {
+        "200": {
+          "description": "sync koha with onleihe",
+          "schema": {
+              "type": "object",
+                "properties": {
+                  "link": {
+                    "description": "onleihe",
                     "type": "boolean"
                   }
                 }

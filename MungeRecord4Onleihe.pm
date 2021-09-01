@@ -1,10 +1,6 @@
 package Koha::Plugin::HKS3Onleihe::MungeRecord4Onleihe;
 
 use Modern::Perl;
-use Template;
-use LWP::UserAgent;
-use XML::XPath;
-use XML::XPath::XMLParser;
 
 use base qw(Koha::Plugins::Base);
 use C4::Context;
@@ -13,16 +9,18 @@ use Cwd qw(abs_path);
 use Koha::Authorities;
 use C4::AuthoritiesMarc;
 
+use Koha::Plugin::HKS3Onleihe::MungeRecord4Onleihe::OnleiheAPI;
+
 
 use Mojo::JSON qw(decode_json);;
 
-our $VERSION = "0.2";
+our $VERSION = "0.3";
 
 our $metadata = {
     name            => 'MungeRecord4Onleihe Plugin',
     author          => 'Mark Hofstetter',
     date_authored   => '2021-03-20',
-    date_updated    => "2021-03-20",
+    date_updated    => "2021-08-24",
     minimum_version => '19.05.00.000',
     maximum_version => undef,
     version         => $VERSION,
@@ -54,16 +52,17 @@ sub api_namespace {
 }
 
 sub munge_record {
-    my ( $self, $record, $params ) = @_;
+    my ( $self, $params ) = @_;
+    my $record = $params->{record};
     return $record unless $record->field("003")->data() eq 'DE-Wi27';
     my $patron = $params->{patron};
+    my $library_data = { Language => 'de', AgencyId => $self->retrieve_data('AgencyId') };
     my $urldata = C4::Context->preference('OPACBaseURL') . '/cgi-bin/koha/opac-user.pl';
     # use Data::Dumper::Concise; print Dumper $patron;
+    # XXX if possible check if book is already issued
     if ($patron) {
-        # say $patron->cardnumber;
-        # say $patron->dateofbirth;
-        # say $patron->email;
-        $urldata = _query_onleihe($patron, $record);
+        my $onleihe = Koha::Plugin::HKS3Onleihe::MungeRecord4Onleihe::OnleiheAPI->new($patron, $library_data);
+        $urldata = $onleihe->get_checkout_url($record);
     } else {
         [$record->field("856")]->[2]->update('z' => 'Bitte einloggen zum entlehnen');
     }
@@ -80,83 +79,59 @@ sub opac_head {
 
 sub opac_js {
     my ( $self ) = @_;
-    my $cgi = $self->{'cgi'};
-    return 1;
+
+    my $agency_id = $self->retrieve_data('AgencyId') ;
+    my $js = "<script> var agency_id = '$agency_id' \n";
+    $js .= <<'JS';
+    var lang = 'de';
+    var page = $('body').attr('ID');
+    var borrowernumber = $('.loggedinusername').data('borrowernumber');
+    console.log('opac: ', page, borrowernumber, agency_id);
+    $(function(e) {
+            var ajaxData = { 'patron_id': borrowernumber,
+                             'lang': lang, 'agency_id': agency_id };
+            $.ajax({
+              url: '/api/v1/contrib/mungerecord4onleihe/synccheckouts',
+            type: 'PUT',
+            dataType: 'json',
+            data: ajaxData,
+        })
+        .done(function(data) {
+            console.log('synced' + data['id']);
+        })
+        .error(function(data) {
+            console.log('sync error');
+        });
+    });
+    </script>
+JS
+
+    return $js;
 }
 
-sub _query_onleihe {
-    my ($patron, $record) = @_;
 
-    my $tt = Template->new({
-        INTERPOLATE  => 0,
-    });
+sub cnfigure {
+    my ( $self, $args ) = @_;
+    my $cgi = $self->{'cgi'};
 
-    my $vars = {
-        UserID              => '3',                     # $patron->id ?
-        CardId              => 'LB0000015',             # $patron->cardnumber
-        DateOfBirth         => '05.02.1949',            # $patron->dateofbirth
-        ItemIdentifier      => $record->field("001")->data(),
-        Language            => 'de',
-        AgencyId            => '392',
-        EmailAddress        => $patron->email,
-    };
+    unless ( $cgi->param('save') ) {
+        my $template = $self->get_template({ file => 'configure.tt' });
 
-    my $xml;
-    my $request_xml = get_xml('requestitem');
-    $tt->process(\$request_xml, $vars, \$xml)
-        || die $tt->error(), "\n";
+        ## Grab the values we already have for our settings, if any exist
+        $template->param(
+            Language        => $self->retrieve_data('Language'),
+            AgencyId        => $self->retrieve_data('AgencyId'),
+        );
 
-    my $checkout_url;
-    my $ua = LWP::UserAgent->new;
-    my $host = "https://ncip.onleihe.de/ncip/service/";
-    my $response = $ua->post($host, Content_Type => 'application/xml', Content => $xml);
-    if ($response->is_success) {
-        my $xp = XML::XPath->new(xml =>  $response->decoded_content);
-        $checkout_url = $xp->findvalue('/NCIPMessage/RequestItemResponse/Ext/Locality/');
+        $self->output_html( $template->output() );
     }
     else {
-        $checkout_url = 'onleihe not available at the moment';
+        $self->store_data(
+            {
+                Language                => $cgi->param('Language'),
+                AgencyId                => $cgi->param('AgencyId'),
+            }
+        );
+        $self->go_home();
     }
-    return $checkout_url;
-}
-
-sub get_xml {
-
-my $xml_templates = {
-requestitem => <<'XML',
-<?xml version="1.0"?>
-<NCIPMessage xmlns:ncip="http://www.niso.org/2008/ncip" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" ncip:version="2.0" xsi:schemaLocation="http://www.niso.org/2008/ncip http://www.niso.org/schemas/ncip/v2_0/ncip_v2_0.xsd">
-<RequestItem>
-<AuthenticationInput>
-<AuthenticationInputData>[% UserID %]</AuthenticationInputData>
-<AuthenticationDataFormatType>text</AuthenticationDataFormatType>
-<AuthenticationInputType>UserId</AuthenticationInputType>
-</AuthenticationInput>
-<AuthenticationInput>
-<AuthenticationInputData>[% CardId %]</AuthenticationInputData>
-<AuthenticationDataFormatType>text</AuthenticationDataFormatType>
-<AuthenticationInputType>CardId</AuthenticationInputType>
-</AuthenticationInput>
-<AuthenticationInput>
-<AuthenticationInputData>[% DateOfBirth %]</AuthenticationInputData>
-<AuthenticationDataFormatType>text</AuthenticationDataFormatType>
-<AuthenticationInputType>DateOfBirth</AuthenticationInputType>
-</AuthenticationInput>
-<ItemId>
-<ItemIdentifierValue>[% ItemIdentifier %]</ItemIdentifierValue>
-</ItemId>
-<RequestType>Loan</RequestType>
-<Ext>
-<Language>[% Language %]</Language>
-<AgencyId>[% AgencyId %]</AgencyId>
-<UnstructuredAddressType>EmailAddress</UnstructuredAddressType>
-<UnstructuredAddressData>[% EmailAddress %]</UnstructuredAddressData>
-</Ext>
-</RequestItem>
-</NCIPMessage>
-XML
-};
-
-    my $template = shift;
-    return $xml_templates->{$template};
 }
