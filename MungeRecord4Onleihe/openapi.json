@@ -44,7 +44,7 @@
     }
   },
   "/synccheckouts": {
-    "put": {
+    "get": {
       "x-mojo-to": "HKS3Onleihe::MungeRecord4Onleihe::MungeRecord4OnleiheController#synccheckouts",
       "operationId": "SyncOnleiheWrite",
       "tags": ["onleihe"],
@@ -95,3 +95,4 @@
     }
   }
 }
+

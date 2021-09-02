@@ -89,10 +89,10 @@ sub opac_js {
     console.log('opac: ', page, borrowernumber, agency_id);
     $(function(e) {
             var ajaxData = { 'patron_id': borrowernumber,
-                             'lang': lang, 'agency_id': agency_id };
+                             'agency_id': agency_id };
             $.ajax({
               url: '/api/v1/contrib/mungerecord4onleihe/synccheckouts',
-            type: 'PUT',
+            type: 'GET',
             dataType: 'json',
             data: ajaxData,
         })
