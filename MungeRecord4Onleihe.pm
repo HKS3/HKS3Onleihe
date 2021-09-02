@@ -110,7 +110,7 @@ JS
 }
 
 
-sub cnfigure {
+sub configure {
     my ( $self, $args ) = @_;
     my $cgi = $self->{'cgi'};
 
