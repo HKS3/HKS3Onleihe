@@ -19,17 +19,30 @@
         <input type="hidden" name="method" value="[% METHOD %]"/>
 
         <p>
-        <br>
         <label for="Language">Parameter 'Language': </label>
         <input type="text" name="Language" values="[% Language %]\>
+        </p>
+        <br>
 
         <p>
-
-        <br>
         <label for="AgencyId">Parameter 'AgencyId': </label>
         <input type="text" name="AgencyId" value="[% AgencyId %]" />
+        </p>
+        <br>
 
         <p>
+        <label for="OnleiheId">Parameter 'OnleiheId': </label>
+        <input type="text" name="OnleiheId" value="[% OnleiheId %]" />
+        </p>
+        <br>
+
+        <p>
+        <label for="Branchcode">Parameter 'Branchcode': </label>
+        <input type="text" name="Branchcode" value="[% Branchcode %]" />
+        </p>
+        <br>
+
+
         <input type="hidden" name="save" value="1" />
 
         <input type="submit" value="Save configuration" />

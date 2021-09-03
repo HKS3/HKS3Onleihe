@@ -54,13 +54,6 @@
         "description": "user id",
         "required": true,
         "type": "string"
-      },
-      {
-        "name": "agency_id",
-        "in": "query",
-        "description": "agency id",
-        "required": true,
-        "type": "string"
       }
       ],
       "produces": [

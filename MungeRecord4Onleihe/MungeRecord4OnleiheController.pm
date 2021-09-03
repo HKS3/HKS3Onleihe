@@ -13,6 +13,7 @@ use C4::Circulation;
 use Koha::Patrons;
 use C4::Context;
 use Koha::Plugin::HKS3Onleihe::MungeRecord4Onleihe::OnleiheAPI;
+use Koha::Plugin::HKS3Onleihe::MungeRecord4Onleihe;
 
 # use JSON;
 
@@ -23,6 +24,7 @@ use Mojo::JSON qw(decode_json encode_json);
 sub status {
     my $c = shift->openapi->valid_input or return;
     my $id = $c->validation->param('id');
+        
 
     my $patron = { user => 'bla', id => $id};
 
@@ -34,10 +36,12 @@ sub status {
 sub synccheckouts {
     my $c = shift->openapi->valid_input or return;
     my $patron_id = $c->validation->param('patron_id');
-    my $agency_id = $c->validation->param('agency_id');
+
+    my $plugin = new Koha::Plugin::HKS3Onleihe::MungeRecord4Onleihe;
+    my $agency_id = $plugin->retrieve_data('AgencyId');
 
     my $patron = Koha::Patrons->find($patron_id);
-    my $branchcode = 'DE-Wi27';
+    my $branchcode = $plugin->retrieve_data('Branchcode');
     C4::Context->set_userenv(0, $branchcode, 0, $branchcode, $branchcode, $branchcode, $branchcode);
     
     my $pending_checkouts = $patron->pending_checkouts->

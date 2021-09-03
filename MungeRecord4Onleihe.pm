@@ -54,7 +54,8 @@ sub api_namespace {
 sub munge_record {
     my ( $self, $params ) = @_;
     my $record = $params->{record};
-    return $record unless $record->field("003")->data() eq 'DE-Wi27';
+    my $onleihe_id = $self->retrieve_data('OnleiheId');
+    return $record unless $record->field("003")->data() eq $onleihe_id;
     my $patron = $params->{patron};
     my $library_data = { Language => 'de', AgencyId => $self->retrieve_data('AgencyId') };
     my $urldata = C4::Context->preference('OPACBaseURL') . '/cgi-bin/koha/opac-user.pl';
@@ -88,12 +89,11 @@ sub opac_js {
     var borrowernumber = $('.loggedinusername').data('borrowernumber');
     console.log('opac: ', page, borrowernumber, agency_id);
     $(function(e) {
-            var ajaxData = { 'patron_id': borrowernumber,
-                             'agency_id': agency_id };
+            var ajaxData = { 'patron_id': borrowernumber };
             $.ajax({
               url: '/api/v1/contrib/mungerecord4onleihe/synccheckouts',
             type: 'GET',
-            dataType: 'json',
+            // dataType: 'json',
             data: ajaxData,
         })
         .done(function(data) {
@@ -121,6 +121,8 @@ sub configure {
         $template->param(
             Language        => $self->retrieve_data('Language'),
             AgencyId        => $self->retrieve_data('AgencyId'),
+            Branchcode      => $self->retrieve_data('Branchcode'),
+            OnleiheId       => $self->retrieve_data('OnleiheId'),
         );
 
         $self->output_html( $template->output() );
@@ -128,8 +130,10 @@ sub configure {
     else {
         $self->store_data(
             {
-                Language                => $cgi->param('Language'),
-                AgencyId                => $cgi->param('AgencyId'),
+            Language        => $cgi->param('Language'),
+            AgencyId        => $cgi->param('AgencyId'),
+            Branchcode      => $cgi->param('Branchcode'),
+            OnleiheId       => $cgi->param('OnleiheId'),
             }
         );
         $self->go_home();
