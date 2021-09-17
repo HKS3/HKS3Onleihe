@@ -67,9 +67,13 @@ sub munge_record {
     } else {
         [$record->field("856")]->[2]->update('z' => 'Bitte einloggen zum entlehnen');
     }
+    
+    my $field856 = $record->field("856");
+    $record->delete_field($field856);
+    $field856 = $record->field("856");
+    $record->delete_field($field856);
 
-    # say $record->field("001")->data();
-    [$record->field("856")]->[2]->update('u' => $urldata);
+    $record->field("856")->update('u' => $urldata);
 
     return $record;
 }
