@@ -91,7 +91,6 @@ sub opac_js {
     var lang = 'de';
     var page = $('body').attr('ID');
     var borrowernumber = $('.loggedinusername').data('borrowernumber');
-    console.log('opac: ', page, borrowernumber, agency_id);
     $(function(e) {
             var ajaxData = { 'patron_id': borrowernumber };
             $.ajax({

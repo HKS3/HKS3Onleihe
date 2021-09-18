@@ -68,7 +68,7 @@ sub synccheckouts {
     my @data;
     foreach my $oi (@$ois) {
         my $oi_isbn = $oi->{ISBN};
-        say $oi_isbn;
+        # say $oi_isbn;
         push @oi_isbns, $oi_isbn;
         if (scalar @barcodes > 0 && any {$_ eq $oi_isbn} @barcodes) {
             push (@data, sprintf( "[%s] already issued", $oi_isbn) );
@@ -104,6 +104,3 @@ sub synccheckouts {
         data => \@data
     } );
 }
-
-1;
-
