@@ -28,3 +28,20 @@ and requires configuration namely the
 
 agency_id from onleihe and language
 
+# SQL of Interest
+
+update biblioitems set itemtype = 'HB' where
+biblioitemnumber in (
+with cte_meta as  (select
+biblionumber,
+ExtractValue(metadata,'//datafield[@tag="337"]/subfield[@code="a"]') mediatype,             ExtractValue(metadata,'//controlfield[@tag="001"]') cn
+from biblio_metadata)
+select bi.biblioitemnumber
+from cte_meta cm join biblioitems bi
+on  cm.biblionumber = bi.biblionumber
+join items i
+on bi.biblioitemnumber = i.biblioitemnumber
+where
+mediatype = 'eaudio'
+and itype = 'HB');
+
