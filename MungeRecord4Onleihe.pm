@@ -80,6 +80,7 @@ sub munge_record {
 
 sub opac_head {
     my ( $self ) = @_;
+    return; # explicitly return nothing, to prevent "1" showing up in output
 }
 
 sub opac_js {
