@@ -22,7 +22,6 @@ sub get_user_status {
 
     my $xml = $self->_query_onleihe('userstatus', { });
     my $nodes = $xml->find('/NCIPMessage/LookupUserResponse/LoanedItem/');
-    use Data::Dumper;
     my @identifier_types;
     my @identifier_values;
     my @loan_list;

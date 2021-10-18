@@ -64,16 +64,16 @@ sub munge_record {
     if ($patron) {
         my $onleihe = Koha::Plugin::HKS3Onleihe::MungeRecord4Onleihe::OnleiheAPI->new($patron, $library_data);
         $urldata = $onleihe->get_checkout_url($record);
+        $record->field("856")->update('u' => $urldata);
     } else {
-        [$record->field("856")]->[2]->update('z' => 'Bitte einloggen zum entlehnen');
+        $record->field("856")->update('z' => 'Bitte einloggen zum entlehnen');
     }
     
-    my $field856 = $record->field("856");
-    $record->delete_field($field856);
-    $field856 = $record->field("856");
-    $record->delete_field($field856);
+    # my $field856 = $record->field("856");
+    # $record->delete_field($field856);
+    # $field856 = $record->field("856");
+    # $record->delete_field($field856);
 
-    $record->field("856")->update('u' => $urldata);
 
     return $record;
 }
