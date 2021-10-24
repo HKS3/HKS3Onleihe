@@ -52,6 +52,15 @@ sub get_checkout_url {
     return $checkout_url;
 }
 
+sub get_checkout_url_from_link {
+    my ($self, $link) = @_;
+    # https://www.onleihe.com/digibib-stmk/frontend/mediaInfo,51-0-1570815771-100-0-0-0-0-0-0-0.html</a>
+    $link =~ /mediaInfo,51-0-(\d+?)-/; 
+    my $xml = $self->_query_onleihe('requestitem', { ItemIdentifier => $1 });
+    my $checkout_url = $xml->findvalue('/NCIPMessage/RequestItemResponse/Ext/Locality/');
+    return $checkout_url;
+}
+
 sub _query_onleihe {
     # my ($patron, $record) = @_;
     my ($self, $query, $add_vars) = @_;

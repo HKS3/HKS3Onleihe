@@ -36,7 +36,12 @@ sub status {
 sub synccheckouts {
     my $c = shift->openapi->valid_input or return;
     my $patron_id = $c->validation->param('patron_id');
+    my $ret = synccheckouts4patron($patron_id);
+    return $c->render( status => 200, openapi => $ret);
+}
 
+sub synccheckouts4patron {
+    my $patron_id = shift;
     my $plugin = new Koha::Plugin::HKS3Onleihe::MungeRecord4Onleihe;
     my $agency_id = $plugin->retrieve_data('AgencyId');
 
@@ -71,7 +76,7 @@ sub synccheckouts {
         # say $oi_isbn;
         push @oi_isbns, $oi_isbn;
         if (scalar @barcodes > 0 && any {$_ eq $oi_isbn} @barcodes) {
-            push (@data, sprintf( "[%s] already issued", $oi_isbn) );
+            push (@data, sprintf( "[%s] already issued in koha", $oi_isbn) );
             next;
         }
         push (@data, sprintf( "[%s] issueing", $oi_isbn) );
@@ -83,7 +88,7 @@ sub synccheckouts {
             $cancelreserve,
             undef,
             undef,
-            { onsite_checkout => 'on', auto_renew => 0, switch_onsite_checkout => 'off', }
+            { onsite_checkout => 'off', auto_renew => 0, switch_onsite_checkout => 'off', }
         );
     }
     
@@ -99,8 +104,8 @@ sub synccheckouts {
         push (@data, sprintf( "[%s] returned", $barcode) ) if $returned;
     }
     
+    my $ret = { data => \@data,
+                ois  => $ois };
+    return $ret;
 
-    return $c->render( status => 200, openapi => {
-        data => \@data
-    } );
 }
