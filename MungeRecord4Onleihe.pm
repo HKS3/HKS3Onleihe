@@ -11,7 +11,6 @@ use C4::AuthoritiesMarc;
 
 use Koha::Plugin::HKS3Onleihe::MungeRecord4Onleihe::OnleiheAPI;
 
-
 use Mojo::JSON qw(decode_json);;
 
 our $VERSION = "0.31";
@@ -85,28 +84,34 @@ sub opac_head {
 
 sub opac_js {
     my ( $self ) = @_;
-
     my $agency_id = $self->retrieve_data('AgencyId') ;
     my $js = "<script> var agency_id = '$agency_id' \n";
     $js .= <<'JS';
     var lang = 'de';
     var page = $('body').attr('ID');
     var borrowernumber = $('.loggedinusername').data('borrowernumber');
-    $(function(e) {
-            var ajaxData = { 'patron_id': borrowernumber };
-            $.ajax({
-              url: '/api/v1/contrib/mungerecord4onleihe/synccheckouts',
-            type: 'GET',
-            // dataType: 'json',
-            data: ajaxData,
-        })
-        .done(function(data) {
-            console.log('synced' + data);
-        })
-        .error(function(data) {
-            console.log('sync error');
+    if (borrowernumber) {
+        $(function(e) {
+                var ajaxData = { 'patron_id': borrowernumber };
+                $.ajax({
+                  url: '/api/v1/contrib/mungerecord4onleihe/synccheckouts',
+                type: 'GET',
+                // dataType: 'json',
+                data: ajaxData,
+            })
+            .done(function(data) {
+                console.log('synced' + data);
+                console.log(data);
+            })
+            .error(function(data) {
+                console.log('sync error');
+            });
         });
-    });
+    } // run only for logged in user
+    else {
+        console.log('no sync');
+    }
+    
     </script>
 JS
 

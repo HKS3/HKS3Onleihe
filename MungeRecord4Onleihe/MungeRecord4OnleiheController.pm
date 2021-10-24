@@ -14,6 +14,7 @@ use Koha::Patrons;
 use C4::Context;
 use Koha::Plugin::HKS3Onleihe::MungeRecord4Onleihe::OnleiheAPI;
 use Koha::Plugin::HKS3Onleihe::MungeRecord4Onleihe;
+use Koha::Caches;
 
 # use JSON;
 
@@ -36,7 +37,27 @@ sub status {
 sub synccheckouts {
     my $c = shift->openapi->valid_input or return;
     my $patron_id = $c->validation->param('patron_id');
-    my $ret = synccheckouts4patron($patron_id);
+    
+    my $cache = Koha::Caches->get_instance();
+    my $cache_active = $cache->is_cache_active;
+    my $cache_answer;
+    my $ret;
+    if ($cache_active) {
+        my $key = sprintf("last_onleihe_sync_%d", $patron_id);
+        $ret = $cache->get_from_cache($key);
+        
+        # cache result for x seconds to go easy on the onleihe api
+        unless ($ret && (time() - $ret->{last_cached} < 20)) {
+            $ret = synccheckouts4patron($patron_id);     
+            $ret->{last_cached} = time();      
+            $ret->{answer_from_cache} = 0;
+            $cache->set_in_cache( $key, $ret, { expiry => 5 });
+        } else {
+            $ret->{answer_from_cache} = 1;
+        }
+    }
+    
+    $ret = synccheckouts4patron($patron_id) unless $ret;
     return $c->render( status => 200, openapi => $ret);
 }
 
