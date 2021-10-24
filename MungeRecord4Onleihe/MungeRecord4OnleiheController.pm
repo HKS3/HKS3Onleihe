@@ -93,7 +93,7 @@ sub synccheckouts4patron {
     my @oi_isbns;
     my @data;
     foreach my $oi (@$ois) {
-        my $oi_isbn = $oi->{ISBN};
+        my $oi_isbn = 'DBS'.$oi->{ISBN};
         # say $oi_isbn;
         push @oi_isbns, $oi_isbn;
         if (scalar @barcodes > 0 && any {$_ eq $oi_isbn} @barcodes) {
@@ -128,5 +128,4 @@ sub synccheckouts4patron {
     my $ret = { data => \@data,
                 ois  => $ois };
     return $ret;
-
 }
