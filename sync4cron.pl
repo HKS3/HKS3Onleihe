@@ -6,7 +6,6 @@ my $plugin = new Koha::Plugin::HKS3Onleihe::MungeRecord4Onleihe;
 
 my $branchcode = $plugin->retrieve_data('Branchcode');
 
-
 my $sql = 'select borrowernumber, count(*) c from issues where branchcode = ? group by borrowernumber';
 my $dbh = C4::Context->dbh;
 my $query = $dbh->prepare($sql);
@@ -16,7 +15,7 @@ my $borrowers = $query->fetchall_arrayref({});
 # print Dumper $borrowers;
 foreach my $borrower (@$borrowers) {
     printf("[%s] borrowernumber \n", $borrower->{borrowernumber});
-    my $ret = Koha::Plugin::HKS3Onleihe::MungeRecord4Onleihe::MungeRecord4OnleiheController::synccheckouts4patron(62);
+    my $ret = Koha::Plugin::HKS3Onleihe::MungeRecord4Onleihe::MungeRecord4OnleiheController::synccheckouts4patron($borrower->{borrowernumber});
     print Dumper $ret;
 }
 
