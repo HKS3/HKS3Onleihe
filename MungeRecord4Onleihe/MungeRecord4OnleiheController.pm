@@ -68,8 +68,10 @@ sub synccheckouts4patron {
 
     my $patron = Koha::Patrons->find($patron_id);
     my $branchcode = $plugin->retrieve_data('Branchcode');
+    printf("%s \n", $branchcode);
     C4::Context->set_userenv(0, $branchcode, 0, $branchcode, $branchcode, $branchcode, $branchcode);
-    
+    my $userenv = C4::Context->userenv();
+
     my $pending_checkouts = $patron->pending_checkouts->
         search({ homebranch => $branchcode },
            { order_by => [ { -desc => 'date_due' }, { -asc => 'issue_id' } ] });
