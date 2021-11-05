@@ -45,3 +45,12 @@ where
 mediatype = 'eaudio'
 and itype = 'HB');
 
+# cronjobs
+
+### sync with onleihe
+# daily sync returned books right after midnight
+7 0 * * *  perl /var/lib/koha/libelle/plugins/Koha/Plugin/HKS3Onleihe/sync4cron.pl >> <logfile> 2>&1
+## watch for recently logged in users and sync their checkouts
+*/15 * * * perl /var/lib/koha/libelle/plugins/Koha/Plugin/HKS3Onleihe/sync_checkouts.pl  >> <logfile> 2>&1
+
+

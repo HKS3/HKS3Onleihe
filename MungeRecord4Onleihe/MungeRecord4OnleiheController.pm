@@ -69,7 +69,10 @@ sub synccheckouts4patron {
     my $patron = Koha::Patrons->find($patron_id);
     my $branchcode = $plugin->retrieve_data('Branchcode');
     printf("%s \n", $branchcode);
-    C4::Context->set_userenv(0, $branchcode, 0, $branchcode, $branchcode, $branchcode, $branchcode);
+    C4::Context->_new_userenv(1);
+    # see sub set_userenv C4/Context
+    C4::Context->set_userenv(undef, undef, undef, undef,
+                             undef, $branchcode, $branchcode);
     my $userenv = C4::Context->userenv();
 
     my $pending_checkouts = $patron->pending_checkouts->
@@ -111,7 +114,7 @@ sub synccheckouts4patron {
             $cancelreserve,
             undef,
             undef,
-            { onsite_checkout => 'off', auto_renew => 0, switch_onsite_checkout => 'off', }
+            # { onsite_checkout => 'off', auto_renew => 0, switch_onsite_checkout => 'off', }
         );
     }
     
