@@ -169,8 +169,8 @@ http://www.niso.org/schemas/ncip/v2_0/ncip_v2_0.xsd">
 <LoanedItemsDesired>true</LoanedItemsDesired>
 <RequestedItemsDesired>true</RequestedItemsDesired>
 <Ext>
-<AgencyId>392</AgencyId>
-<Language>de</Language>
+<AgencyId>[% AgencyId %]</AgencyId>
+<Language>[% Language %]</Language>
 </Ext>
 </LookupUser>
 </NCIPMessage>
