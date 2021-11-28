@@ -1,6 +1,6 @@
 # HKS3Onleihe
 
-
+#### sponsored by: State library Styria (Steiermärkische Landesbibliothek) [https://www.landesbibliothek.steiermark.at/]
 
 ### Installation
 
