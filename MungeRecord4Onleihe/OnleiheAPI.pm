@@ -75,7 +75,7 @@ sub _query_onleihe {
         DateOfBirth         => $self->{patron}->dateofbirth,
         # ItemIdentifier      => $record->field("001")->data(),
         Language            => $self->{library_data}->{Language},   #  de',
-        AgencyId            => $self->{library_data}->{AgencyId},         # '392',
+        AgencyId            => $self->{library_data}->{AgencyId},
         EmailAddress        => $self->{patron}->email,
     };
 
