@@ -10,8 +10,8 @@ define Koha Branchcode for onleihe items
 
 copy or better link "proxy" to opac and intranet
 ```
-ln -s /var/lib/koha/libelle/plugins/Koha/Plugin/HKS3Onleihe/redirect-onleihe.pl /usr/share/koha/opac/cgi-bin/opac/redirect-onleihe.pl
-ln -s /var/lib/koha/libelle/plugins/Koha/Plugin/HKS3Onleihe/redirect-onleihe.pl /usr/share/koha/intranet/cgi-bin/redirect-onleihe.pl
+ln -s /var/lib/koha/libelle/plugins/Koha/Plugin/HKS3Onleihe/bin/redirect-onleihe.pl /usr/share/koha/opac/cgi-bin/opac/redirect-onleihe.pl
+ln -s /var/lib/koha/libelle/plugins/Koha/Plugin/HKS3Onleihe/bin/redirect-onleihe.pl /usr/share/koha/intranet/cgi-bin/redirect-onleihe.pl
 ```
 
 #### Configure
