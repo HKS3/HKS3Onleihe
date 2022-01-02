@@ -100,8 +100,8 @@ sub opac_js {
                 data: ajaxData,
             })
             .done(function(data) {
-                console.log('synced' + data);
-                console.log(data);
+                // console.log('synced' + data);
+                // console.log(data);
             })
             .error(function(data) {
                 console.log('sync error');
@@ -109,7 +109,7 @@ sub opac_js {
         });
     } // run only for logged in user
     else {
-        console.log('no sync');
+        // console.log('no sync');
     }
     
     </script>
