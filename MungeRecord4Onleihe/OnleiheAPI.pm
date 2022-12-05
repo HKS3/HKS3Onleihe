@@ -29,6 +29,7 @@ sub get_user_status {
         # say STDERR  $node->find('ItemId/ItemIdentifierValue');
         my $types = $node->find('Ext/ItemIdentifierType');
         my $values = $node->find('Ext/ItemIdentifierValue');
+        my $datedues = $node->find('Ext/DateDue');
         foreach my $type ($types->get_nodelist) {
             push @identifier_types, $type->string_value();
         }
@@ -38,7 +39,9 @@ sub get_user_status {
         my %loans;
         @loans{@identifier_types} = @identifier_values;
         $loans{itemid} = $node->find('ItemId/ItemIdentifierValue')->string_value();
+        $loans{datedue} = $node->find('Ext/DateDue')->string_value();
         $loans{ISBN} =~ s/-//g;
+        # use Data::Dumper; print Dumper \%loans;
         push @loan_list, \%loans;
     }
 

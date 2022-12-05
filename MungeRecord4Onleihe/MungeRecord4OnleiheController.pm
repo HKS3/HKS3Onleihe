@@ -99,7 +99,11 @@ sub synccheckouts4patron {
     my @data;
     foreach my $oi (@$ois) {
         my $oi_isbn = 'DBS'.$oi->{ISBN};
-        # say $oi_isbn;
+        # say $oi->{datedue};
+
+        my ($y, $m, $d) = $oi->{datedue} =~ /^(\d{4})-(\d{2})-(\d{2})/;
+        my $dt = DateTime->new( year => $y , month => $m, day => $d);
+        # say $dt->ymd;
         push @oi_isbns, $oi_isbn;
         if (scalar @barcodes > 0 && any {$_ eq $oi_isbn} @barcodes) {
             push (@data, sprintf( "[%s] already issued in koha", $oi_isbn) );
@@ -110,12 +114,13 @@ sub synccheckouts4patron {
         # print Dumper $item_object;
         my $issue = AddIssue( $patron->unblessed,
             $oi_isbn,
-            $datedue,
+            $dt,
             $cancelreserve,
             undef,
             undef,
             # { onsite_checkout => 'off', auto_renew => 0, switch_onsite_checkout => 'off', }
         );
+        # use Data::Dumper; print Dumper $issue;
     }
     
     # remove if not checked out in onleihe
