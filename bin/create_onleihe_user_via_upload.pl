@@ -27,8 +27,10 @@ with cte_users as (
 	union
 	select borrowernumber, cardnumber, date_format(dateofbirth, "%d.%m.%Y"), 0, 1, "I", "STMK", dateenrolled from borrowers where categorycode = 'OA'
 	union
-	select borrowernumber, cardnumber, date_format(dateofbirth, "%d.%m.%Y"), 0, 3, "U", "STMK", cast(updated_on as date) from borrowers where categorycode <> 'OA'  
-        -- select borrowernumber, cardnumber, date_format(dateofbirth, "%d.%m.%Y"), 0, if(debarred > '2022-02-21', 1, 3), "U", "STMK", cast(updated_on as date) from borrowers where categorycode <> 'OA'
+	-- select borrowernumber, cardnumber, date_format(dateofbirth, "%d.%m.%Y"), 0, 3, "U", "STMK", cast(updated_on as date) from borrowers where categorycode <> 'OA'  
+        select borrowernumber, cardnumber, date_format(dateofbirth, "%d.%m.%Y"), 0, if(debarred > ?, 1, 3), "U", "STMK", cast(updated_on as date) from borrowers where categorycode <> 'OA'
+	union
+        select borrowernumber, cardnumber, date_format(dateofbirth, "%d.%m.%Y"), 0, if(debarred > ?, 1, 3), "U", "STMK", debarred from borrowers where categorycode <> 'OA'
 	)
 select  borrowernumber, cardnumber, dob, fsk, status, crud, bib  from cte_users where m_date = ?
 SQL
@@ -41,7 +43,7 @@ print("$filename\n");
 
 my $dbh = C4::Context->dbh;
 my $query = $dbh->prepare($sql);
-$query->execute($date);
+$query->execute($date, $date, $date);
 my $borrowers = $query->fetchall_arrayref([]);
 
 # print Dumper $borrowers;
