@@ -33,6 +33,7 @@ with cte_users as (
         select borrowernumber, cardnumber, date_format(dateofbirth, "%d.%m.%Y"), 0, if(debarred > ?, 1, 3), "U", "STMK", debarred from borrowers where categorycode <> 'OA'
 	)
 select  borrowernumber, cardnumber, dob, fsk, status, crud, bib  from cte_users where m_date = ?
+and (borrowernumber not in (select borrowernumber from borrowers where borrowernumber = cte_users.borrowernumber and dateexpiry <= ?) or crud = "D")
 SQL
 
 my $dir = $ENV{ONLEIHE_USER_DIR};
