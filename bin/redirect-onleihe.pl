@@ -50,9 +50,11 @@ my $onleihe_id = $onleihe->retrieve_data('OnleiheId');
 my $library_data = { Language => 'de', AgencyId => $onleihe->retrieve_data('AgencyId') };
 my $urldata = C4::Context->preference('OPACBaseURL') . '/cgi-bin/koha/opac-user.pl';
 # XXX if possible check if book is already issued
-if ($patron) {
+if ($patron && $patron->categorycode ne 'OA' ) {
     my $onleihe = Koha::Plugin::HKS3Onleihe::MungeRecord4Onleihe::OnleiheAPI->new($patron, $library_data);
     $urldata = $onleihe->get_checkout_url_from_link($onleihe_url);
+} else {
+    $urldata = 'https://katalog.landesbibliothek.steiermark.at/';
 }
 
 print $query->redirect($urldata);
