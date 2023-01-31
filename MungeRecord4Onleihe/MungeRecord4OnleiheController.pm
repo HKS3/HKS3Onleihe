@@ -102,7 +102,7 @@ sub synccheckouts4patron {
         # say $oi->{datedue};
 
         my ($y, $m, $d) = $oi->{datedue} =~ /^(\d{4})-(\d{2})-(\d{2})/;
-        my $dt = DateTime->new( year => $y , month => $m, day => $d);
+        my $dt = DateTime->new( year => $y , month => $m, day => $d, hour => 23, minute => 59);
         # say $dt->ymd;
         push @oi_isbns, $oi_isbn;
         if (scalar @barcodes > 0 && any {$_ eq $oi_isbn} @barcodes) {
