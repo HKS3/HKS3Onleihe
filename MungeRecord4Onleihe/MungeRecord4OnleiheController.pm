@@ -3,13 +3,11 @@ package Koha::Plugin::HKS3Onleihe::MungeRecord4Onleihe::MungeRecord4OnleiheContr
 use Mojo::Base 'Mojolicious::Controller';
 
 use C4::Context;
-use C4::Debug;
-use C4::Output qw(:html :ajax pagination_bar);
 
 use HTTP::Request;
 use LWP::UserAgent;
 use List::MoreUtils qw(any);
-use C4::Circulation;
+use C4::Circulation qw( AddReturn );
 use Koha::Patrons;
 use C4::Context;
 use Koha::Plugin::HKS3Onleihe::MungeRecord4Onleihe::OnleiheAPI;
